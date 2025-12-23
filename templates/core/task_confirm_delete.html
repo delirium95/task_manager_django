@@ -1,0 +1,72 @@
+<!-- templates/core/task_confirm_delete.html -->
+{% extends "base.html" %}
+
+{% block title %}Видалення завдання{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Видалити завдання
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-trash text-danger" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <h5 class="card-title text-center">Ви впевнені?</h5>
+
+                    <div class="alert alert-warning">
+                        <strong>Увага!</strong> Ви збираєтесь видалити завдання:
+                        <div class="mt-2 p-3 bg-light rounded">
+                            <h6 class="mb-1">{{ task.name }}</h6>
+                            <small class="text-muted">
+                                {% if task.project %}
+                                    Проєкт: {{ task.project.name }}<br>
+                                {% endif %}
+                                Дедлайн: {{ task.deadline|date:"d.m.Y" }}<br>
+                                Статус: {% if task.is_completed %}Виконано{% else %}В роботі{% endif %}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <strong>Ця дія незворотна!</strong> Видалене завдання неможливо відновити.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Так, видалити
+                            </button>
+                            <a href="{% if task.project %}{% url 'projects:detail' task.project.pk %}{% else %}{% url 'core:task_detail' task.pk %}{% endif %}"
+                               class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Скасувати
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-width: 2px;
+    }
+
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+    }
+
+    .alert-danger {
+        border-left: 4px solid #dc3545;
+    }
+</style>
+{% endblock %}

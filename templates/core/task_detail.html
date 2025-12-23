@@ -1,0 +1,170 @@
+<!-- templates/core/task_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ task.name }} - Деталі{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ task.name }}</h1>
+            <div class="badge bg-{{ task.priority|lower }}">
+                {{ task.get_priority_display }}
+            </div>
+            {% if task.is_completed %}
+                <span class="badge bg-success">✅ Виконано</span>
+            {% else %}
+                <span class="badge bg-warning">🔄 В роботі</span>
+            {% endif %}
+            {% if task.is_overdue %}
+                <span class="badge bg-danger">⚠️ Прострочено</span>
+            {% endif %}
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'core:task_update' task.pk %}" class="btn btn-outline-primary">Редагувати</a>
+            <a href="{% url 'core:task_delete' task.pk %}" class="btn btn-outline-danger">Видалити</a>
+            <a href="{% url 'core:task_list' %}" class="btn btn-secondary">Назад</a>
+        </div>
+    </div>
+
+    <!-- Основна інформація -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Опис завдання</h5>
+                    <p class="card-text">{{ task.description|linebreaks }}</p>
+                </div>
+            </div>
+
+            <!-- Деталі -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Деталі</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>📅 Дедлайн:</strong> {{ task.deadline|date:"d.m.Y H:i" }}</p>
+                            <p><strong>⏰ Залишилось:</strong>
+                                {% if task.days_until_deadline < 0 %}
+                                    <span class="text-danger">{{ task.days_until_deadline|stringformat:"+d"|slice:"1:" }} днів тому</span>
+                                {% else %}
+                                    <span class="text-success">{{ task.days_until_deadline }} днів</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>📊 Статус:</strong>
+                                {% if task.is_completed %}
+                                    Виконано {{ task.finished_at|date:"d.m.Y" }}
+                                {% else %}
+                                    В роботі
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>📋 Тип:</strong> {{ task.task_type.name|default:"Не вказано" }}</p>
+                            <p><strong>👥 Пріоритет:</strong> {{ task.get_priority_display }}</p>
+                            <p><strong>👤 Створив:</strong> {{ task.created_by.get_full_name|default:task.created_by.username }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Бічна панель -->
+        <div class="col-md-4">
+            <!-- Проєкт -->
+            {% if task.project %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">📂 Проєкт</h5>
+                    <p class="card-text">
+                        <a href="{% url 'projects:detail' task.project.pk %}">{{ task.project.name }}</a>
+                    </p>
+                    <p class="text-muted"><small>{{ task.project.description|truncatechars:60 }}</small></p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Команда -->
+            {% if task.team %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Команда</h5>
+                    <p class="card-text">{{ task.team.name }}</p>
+                    <p class="text-muted"><small>{{ task.team.description|truncatechars:60|default:"Без опису" }}</small></p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Виконавці -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🎯 Виконавці</h5>
+                    {% if task.assignees.all %}
+                        <ul class="list-unstyled">
+                            {% for assignee in task.assignees.all %}
+                                <li class="mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                                 style="width: 32px; height: 32px;">
+                                                {{ assignee.first_name|first|default:assignee.username|first|upper }}
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <strong>{{ assignee.get_full_name|default:assignee.username }}</strong><br>
+                                            <small class="text-muted">{{ assignee.position|default:"Без посади" }}</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">Виконавці не призначені</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Швидкі дії -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">⚡ Швидкі дії</h5>
+                    {% if not task.is_completed %}
+                        <form method="post" action="{% url 'core:task_complete' task.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success w-100 mb-2">
+                                ✅ Позначити як виконане
+                            </button>
+                        </form>
+                    {% endif %}
+                    <a href="{% url 'core:task_update' task.pk %}" class="btn btn-outline-primary w-100 mb-2">
+                        ✏️ Редагувати
+                    </a>
+                    <a href="{% url 'core:task_delete' task.pk %}" class="btn btn-outline-danger w-100">
+                        🗑️ Видалити
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge.bg-urgent { background-color: #dc3545; }
+    .badge.bg-high { background-color: #fd7e14; }
+    .badge.bg-medium { background-color: #ffc107; color: #000; }
+    .badge.bg-low { background-color: #28a745; }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .card-title {
+        color: #4e73df;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Проєкти - Task Manager{% endblock %}
+{% block page_title %}Мої проєкти{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'projects:create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Новий проєкт
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Фільтри -->
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Пошук проєктів..." value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Всі статуси</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Активні</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Неактивні</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="stage" class="form-select">
+                            <option value="">Всі етапи</option>
+                            {% for value, label in stages %}
+                                <option value="{{ value }}" {% if request.GET.stage == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-funnel"></i> Фільтрувати
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Список проєктів -->
+    {% if projects %}
+        {% for project in projects %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card project-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title">
+                                    <a href="{% url 'projects:detail' project.pk %}" class="text-decoration-none">
+                                        {{ project.name }}
+                                    </a>
+                                </h5>
+                                <div class="mb-2">
+                                    <span class="badge bg-{{ project.is_active|yesno:'success,secondary' }}">
+                                        {{ project.is_active|yesno:'Активний,Неактивний' }}
+                                    </span>
+                                    <span class="badge bg-info">{{ project.get_stage_display }}</span>
+                                </div>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'projects:detail' project.pk %}">
+                                            <i class="bi bi-eye"></i> Перегляд
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'projects:update' project.pk %}">
+                                            <i class="bi bi-pencil"></i> Редагувати
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <form method="post" action="{% url 'projects:toggle-active' project.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-power"></i> 
+                                                {{ project.is_active|yesno:'Деактивувати,Активувати' }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="{% url 'projects:delete' project.pk %}">
+                                            <i class="bi bi-trash"></i> Видалити
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <p class="card-text text-muted">{{ project.description|truncatechars:120 }}</p>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-person"></i> Власник: {{ project.owner.full_name }}
+                            </small>
+                            <small class="text-muted d-block">
+                                <i class="bi bi-calendar"></i> Початок: {{ project.start_date|date:"d.m.Y" }}
+                            </small>
+                            {% if project.deadline %}
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-clock"></i> Дедлайн: {{ project.deadline|date:"d.m.Y" }}
+                                </small>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Прогрес бар -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Прогрес: {{ project.get_progress }}%</small>
+                                <small>{{ project.get_completed_tasks.count }}/{{ project.tasks.count }} завдань</small>
+                            </div>
+                            <div class="progress progress-thin">
+                                <div class="progress-bar bg-success" style="width: {{ project.get_progress }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Команди -->
+                        {% if project.teams.all %}
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-people"></i> 
+                                    {% for team in project.teams.all|slice:":2" %}
+                                        <span class="badge bg-light text-dark">{{ team.name }}</span>
+                                    {% endfor %}
+                                    {% if project.teams.count > 2 %}
+                                        <span class="text-muted">+{{ project.teams.count|add:"-2" }}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-folder-x display-1 text-muted"></i>
+                <h3 class="text-muted mt-3">Проєктів не знайдено</h3>
+                <p class="text-muted">Створіть перший проєкт або змініть параметри пошуку</p>
+                <a href="{% url 'projects:create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Створити проєкт
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Пагінація -->
+{% if is_paginated %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">
+                        Попередня
+                    </a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">
+                        Наступна
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

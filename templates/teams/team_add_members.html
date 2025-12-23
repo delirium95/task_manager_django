@@ -1,0 +1,38 @@
+<!-- templates/teams/team_add_members.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Додати учасників до: {{ team.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Оберіть користувачів</label>
+                            {{ form.users }}
+                            <small class="form-text text-muted">
+                                Утримуйте Ctrl (Cmd на Mac) для вибору кількох користувачів
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'teams:team_detail' team.pk %}" class="btn btn-secondary">
+                                Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Додати до команди
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

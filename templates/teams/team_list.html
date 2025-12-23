@@ -1,0 +1,42 @@
+<!-- templates/teams/team_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Мої команди</h1>
+        <a href="{% url 'teams:team_create' %}" class="btn btn-primary">
+            + Створити команду
+        </a>
+    </div>
+
+    {% if teams %}
+        <div class="row">
+            {% for team in teams %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ team.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Лідер: {{ team.leader.get_full_name|default:team.leader.username }}<br>
+                                Учасників: {{ team.members.count }}
+                            </small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{% url 'teams:team_detail' team.pk %}" class="btn btn-sm btn-outline-primary">
+                            Деталі
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Ви ще не в жодній команді. Створіть свою першу команду!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

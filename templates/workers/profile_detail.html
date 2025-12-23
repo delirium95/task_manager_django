@@ -1,0 +1,65 @@
+<!-- templates/workers/profile.html -->
+{% extends 'base.html' %}
+{% load thumbnail %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Аватар та основна інформація -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if user.avatar %}
+                        {% thumbnail user.avatar "200x200" crop="center" as im %}
+                            <img src="{{ im.url }}"
+                                 class="img-fluid rounded-circle mb-3"
+                                 alt="{{ user.get_full_name }}">
+                        {% endthumbnail %}
+                    {% else %}
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3 mx-auto"
+                             style="width: 200px; height: 200px;">
+                            <span class="fs-1 text-muted">
+                                {{ user.first_name|first|default:user.username|first|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">@{{ user.username }}</p>
+
+                    {% if user.position %}
+                        <span class="badge bg-primary">{{ user.position }}</span>
+                    {% endif %}
+
+                    <div class="mt-3">
+                        <a href="{% url 'users:profile_update' %}" class="btn btn-primary">
+                            Редагувати профіль
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Детальна інформація -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Інформація</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">{{ user.email|default:"Не вказано" }}</dd>
+
+                        <dt class="col-sm-3">Посада</dt>
+                        <dd class="col-sm-9">{{ user.position|default:"Не вказано" }}</dd>
+
+                        <dt class="col-sm-3">Дата приєднання</dt>
+                        <dd class="col-sm-9">{{ user.date_joined|date:"d.m.Y" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

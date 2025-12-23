@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    <!-- Якщо користувач вже авторизований -->
+    <div class="container mt-5">
+        <div class="alert alert-warning text-center">
+            <h4>Ви вже авторизовані!</h4>
+            <p>Для створення нового акаунта спочатку вийдіть з поточного.</p>
+            <div class="mt-3">
+                <a href="{% url 'users:profile' %}" class="btn btn-primary">
+                    Перейти до профілю
+                </a>
+                <a href="{% url 'users:logout' %}" class="btn btn-outline-danger">
+                    Вийти
+                </a>
+            </div>
+        </div>
+    </div>
+{% else %}
+  <h2>Sign UP</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">SignUp</button>
+  </form>
+{% endif %}
+{% endblock %}

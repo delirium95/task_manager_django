@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.log
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Database
+db.sqlite3
+*.sqlite3
+
+# Media and Static files (optional, depending on deployment strategy)
+# Consider ignoring these if they are generated during deployment
+/media
+/static
+
+# Django-specific files
+local_settings.py
+.DS_Store # macOS specific
+Thumbs.db # Windows specific
+.coverage
+
+# IDE-specific files (optional, adjust for your IDE)
+.idea/ # PyCharm
+.vscode/ # VS Code
+*.sublime-project
+*.sublime-workspace
