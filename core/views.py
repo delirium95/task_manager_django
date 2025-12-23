@@ -1,4 +1,3 @@
-# core/views.py (або tasks/views.py)
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q

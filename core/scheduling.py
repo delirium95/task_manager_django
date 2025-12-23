@@ -51,17 +51,3 @@ def setup_periodic_tasks():
         name='Send daily digest',
         task='core.tasks.send_daily_digest',
     )
-    # Додамо в core/tasks.py
-    from django.contrib.sessions.models import Session
-    from django.utils import timezone
-
-    @shared_task
-    def clear_expired_sessions():
-        """Очищення закінчених сесій"""
-        try:
-            expired_sessions = Session.objects.filter(expire_date__lt=timezone.now())
-            count = expired_sessions.count()
-            expired_sessions.delete()
-            return f'Cleared {count} expired sessions'
-        except Exception as e:
-            return f'Error: {e}'

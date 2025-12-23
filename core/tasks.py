@@ -1,15 +1,27 @@
-# core/tasks.py (створимо новий файл)
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 from .models import Task, Project
 from datetime import timedelta
 import logging
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+
+@shared_task
+def clear_expired_sessions():
+    """Очищення закінчених сесій"""
+    try:
+        expired_sessions = Session.objects.filter(expire_date__lt=timezone.now())
+        count = expired_sessions.count()
+        expired_sessions.delete()
+        return f'Cleared {count} expired sessions'
+    except Exception as e:
+        return f'Error: {e}'
 
 
 @shared_task
