@@ -110,7 +110,7 @@
                                 <a href="{% url 'core:task_detail' task.pk %}"  class="btn btn-outline-info">Перегляд</a>
                                 <a href="{% url 'core:task_update' task.pk %}" class="btn btn-outline-primary">Редагувати</a>
                                 {% if not task.is_completed %}
-                                    <form method="post" action="#" class="d-inline">
+                                    <form method="post" action="{% url 'core:task_complete' task.pk %}" class="d-inline">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-outline-success">Завершити</button>
                                     </form>
