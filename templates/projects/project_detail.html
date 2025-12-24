@@ -125,7 +125,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="#" class="btn btn-sm btn-outline-info">Перегляд</a>
+                                    <a href="{% url 'core:task_detail' task.pk %}" class="btn btn-sm btn-outline-info">Перегляд</a>
                                 </td>
                             </tr>
                             {% endfor %}
