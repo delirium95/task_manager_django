@@ -13,7 +13,7 @@ from .forms import ProjectForm
 from core.models import Project
 
 
-class ProjectListView(LoginRequiredMixin, ListView):
+class ProjectListView(ListView):
     """Список всіх проєктів"""
     model = Project
     template_name = 'projects/project_list.html'
