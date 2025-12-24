@@ -18,10 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from projects.views import ProjectListView
+from users.views import SignUpView
 
 urlpatterns = [
-    path("", ProjectListView.as_view(), name="home"),
+    path("", SignUpView.as_view(), name="home"),
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
