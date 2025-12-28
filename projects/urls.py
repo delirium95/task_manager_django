@@ -39,7 +39,7 @@ urlpatterns = [
     # Статистика проєкту
     path('<int:pk>/stats/', views.ProjectStatsView.as_view(), name='stats'),
 
-    # API ендпоінти (якщо потрібно)
+    # API ендпоінти
     path('api/<int:pk>/tasks/', views.ProjectTasksAPIView.as_view(), name='api-tasks'),
 
     # Перенаправлення для старої адреси

@@ -1,4 +1,3 @@
-# core/periodic_tasks.py (створимо новий файл)
 from celery import shared_task
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 

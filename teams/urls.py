@@ -13,6 +13,3 @@ urlpatterns = [
     path('<int:pk>/add-members/', views.TeamAddMembersView.as_view(), name='team_add_members'),
     path('<int:pk>/remove-member/<int:user_id>/', views.TeamRemoveMemberView.as_view(), name='team_remove_member'),
 ]
-# todo
-# 1. celery + redis => queue for sending emails task
-# 2. celery beat clear sessions
