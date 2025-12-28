@@ -1,0 +1,106 @@
+<!-- templates/teams/team_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>{{ team.name }}</h1>
+        </div>
+
+        <!-- Кнопки для лідера -->
+        {% if team.leader == user %}
+        <div class="btn-group">
+            <a href="{% url 'teams:team_update' team.pk %}" class="btn btn-outline-primary">
+                Редагувати
+            </a>
+            <a href="{% url 'teams:team_add_members' team.pk %}" class="btn btn-outline-success">
+                + Додати учасників
+            </a>
+            <a href="{% url 'teams:team_delete' team.pk %}" class="btn btn-outline-danger">
+                Видалити
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Інформація про команду -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Інформація</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Лідер:</dt>
+                        <dd class="col-sm-8">{{ team.leader.get_full_name|default:team.leader.username }}</dd>
+
+                        <dt class="col-sm-4">Створено:</dt>
+                        <dd class="col-sm-8">{{ team.created_at|date:"d.m.Y" }}</dd>
+
+                        <dt class="col-sm-4">Учасників:</dt>
+                        <dd class="col-sm-8">{{ team.members.count }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список учасників -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Учасники команди</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for member in team.members.all %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                {% if member.avatar %}
+                                    <img src="{{ member.avatar.url }}"
+                                         class="rounded-circle me-3"
+                                         width="50" height="50"
+                                         alt="{{ member.get_full_name }}">
+                                {% else %}
+                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 50px; height: 50px;">
+                                        <span class="text-white">
+                                            {{ member.get_full_name|first|default:member.username|first|upper }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-0">{{ member.get_full_name|default:member.username }}</h6>
+                                    <small class="text-muted">{{ member.email }}</small>
+                                    {% if member == team.leader %}
+                                        <span class="badge bg-primary ms-2">Лідер</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% if team.leader == user and member != team.leader %}
+                        <div class="card-footer bg-transparent">
+                            <form method="post" action="{% url 'teams:team_remove_member' team.pk member.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Видалити
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p class="text-muted text-center">Немає учасників</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

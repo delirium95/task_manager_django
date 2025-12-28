@@ -1,0 +1,58 @@
+[
+  {
+    "model": "tasks.position",
+    "pk": 1,
+    "fields": {
+      "name": "Frontend Developer"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 2,
+    "fields": {
+      "name": "Backend Developer"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 3,
+    "fields": {
+      "name": "Full Stack Developer"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 4,
+    "fields": {
+      "name": "Project Manager"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 5,
+    "fields": {
+      "name": "QA Engineer"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 6,
+    "fields": {
+      "name": "DevOps Engineer"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 7,
+    "fields": {
+      "name": "UI/UX Designer"
+    }
+  },
+  {
+    "model": "tasks.position",
+    "pk": 8,
+    "fields": {
+      "name": "Business Analyst"
+    }
+  }
+]

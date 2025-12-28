@@ -1,0 +1,172 @@
+<!-- templates/core/task_form.html -->
+{% extends "base.html" %}
+
+{% block title %}{% if form.instance.pk %}Редагувати завдання{% else %}Нове завдання{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        {% if form.instance.pk %}
+                            Редагувати завдання
+                        {% else %}
+                            Створити нове завдання
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Виправте помилки:</strong>
+                                <ul>
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Назва -->
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">Назва завдання *</label>
+                            <input type="text" name="name" id="id_name"
+                                   class="form-control" required
+                                   value="{{ form.name.value|default:'' }}">
+                        </div>
+
+                        <!-- Опис -->
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Опис *</label>
+                            <textarea name="description" id="id_description"
+                                      class="form-control" rows="4" required>{{ form.description.value|default:'' }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <!-- Дедлайн -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_deadline" class="form-label">Дедлайн *</label>
+                                <input type="datetime-local" name="deadline" id="id_deadline"
+                                       class="form-control" required
+                                       value="{{ form.deadline.value|date:'Y-m-d\TH:i'|default:'' }}">
+                            </div>
+
+                            <!-- Пріоритет -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_priority" class="form-label">Пріоритет</label>
+                                <select name="priority" id="id_priority" class="form-select">
+                                    {% for value, label in form.fields.priority.choices %}
+                                        <option value="{{ value }}"
+                                                {% if form.priority.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Проєкт -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_project" class="form-label">Проєкт</label>
+                                <select name="project" id="id_project" class="form-select">
+                                    <option value="">---------</option>
+                                    {% for project in form.fields.project.queryset %}
+                                        <option value="{{ project.id }}"
+                                                {% if form.project.value == project.id %}selected{% endif %}>
+                                            {{ project.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Тип завдання -->
+                            <div class="col-md-6 mb-3">
+                                <label for="id_task_type" class="form-label">Тип завдання</label>
+                                <select name="task_type" id="id_task_type" class="form-select">
+                                    <option value="">---------</option>
+                                    {% for task_type in form.fields.task_type.queryset %}
+                                        <option value="{{ task_type.id }}"
+                                                {% if form.task_type.value == task_type.id %}selected{% endif %}>
+                                            {{ task_type.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Виконавці -->
+                        <div class="mb-3">
+                            <label class="form-label">Виконавці</label>
+                            <select name="assignees" id="id_assignees" class="form-select" multiple>
+                                {% for worker in form.fields.assignees.queryset %}
+                                    <option value="{{ worker.id }}"
+                                            {% if worker.id in form.assignees.value %}selected{% endif %}>
+                                        {{ worker.get_full_name }} ({{ worker.position }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Утримуйте Ctrl для вибору кількох користувачів</small>
+                        </div>
+
+                        <!-- Команда -->
+                        <div class="mb-3">
+                            <label for="id_team" class="form-label">Команда</label>
+                            <select name="team" id="id_team" class="form-select">
+                                <option value="">---------</option>
+                                {% for team in form.fields.team.queryset %}
+                                    <option value="{{ team.id }}"
+                                            {% if form.team.value == team.id %}selected{% endif %}>
+                                        {{ team.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Статус завершення -->
+                        {% if form.instance.pk %}
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="is_completed"
+                                   id="id_is_completed" class="form-check-input"
+                                   {% if form.is_completed.value %}checked{% endif %}>
+                            <label for="id_is_completed" class="form-check-label">
+                                Завдання виконане
+                            </label>
+                        </div>
+                        {% endif %}
+
+                        <!-- Кнопки -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% if form.instance.project %}{% url 'projects:detail' form.instance.project.pk %}{% else %}{% url 'core:task_list' %}{% endif %}"
+                               class="btn btn-secondary">
+                                Скасувати
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}Зберегти зміни{% else %}Створити завдання{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    select[multiple] {
+        min-height: 150px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+</style>
+{% endblock %}

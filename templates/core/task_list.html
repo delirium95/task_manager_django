@@ -1,0 +1,150 @@
+<!-- templates/core/task_list.html -->
+{% extends "base.html" %}
+
+{% block title %}Завдання{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Завдання</h1>
+        <div>
+            <a href="{% url 'core:task_create' %}" class="btn btn-primary">+ Нове завдання</a>
+        </div>
+    </div>
+
+    <!-- Фільтри -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">Всі статуси</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Активні</option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Виконані</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="priority" class="form-select">
+                        <option value="">Всі пріоритети</option>
+                        <option value="URGENT" {% if request.GET.priority == 'URGENT' %}selected{% endif %}>Терміново</option>
+                        <option value="HIGH" {% if request.GET.priority == 'HIGH' %}selected{% endif %}>Високий</option>
+                        <option value="MEDIUM" {% if request.GET.priority == 'MEDIUM' %}selected{% endif %}>Середній</option>
+                        <option value="LOW" {% if request.GET.priority == 'LOW' %}selected{% endif %}>Низький</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Пошук за назвою..."
+                           value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">Фільтрувати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список завдань -->
+    {% if tasks %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Назва</th>
+                        <th>Проєкт</th>
+                        <th>Пріоритет</th>
+                        <th>Дедлайн</th>
+                        <th>Статус</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr class="{% if task.is_overdue %}table-danger{% endif %}
+                               {% if task.is_completed %}table-success{% endif %}">
+                        <td>
+                            <strong>{{ task.name }}</strong>
+                            <br>
+                            <small class="text-muted">{{ task.description|truncatechars:60 }}</small>
+                            {% if task.is_overdue %}
+                                <br>
+                                <small class="text-danger">⚠️ Прострочено!</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.project %}
+                                <a href="{% url 'projects:detail' task.project.pk %}">
+                                    {{ task.project.name }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Без проєкту</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ task.priority|lower }}">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ task.deadline|date:"d.m.Y H:i" }}
+                            <br>
+                            <small class="{% if task.days_until_deadline < 0 %}text-danger{% elif task.days_until_deadline < 3 %}text-warning{% else %}text-muted{% endif %}">
+                                {% if task.days_until_deadline < 0 %}
+                                    {{ task.days_until_deadline|stringformat:"+d"|slice:"1:" }} днів тому
+                                {% else %}
+                                    за {{ task.days_until_deadline }} дн.
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            {% if task.is_completed %}
+                                <span class="badge bg-success">✅ Виконано</span>
+                                <br>
+                                <small>{{ task.finished_at|date:"d.m.Y" }}</small>
+                            {% else %}
+                                <span class="badge bg-warning">🔄 В роботі</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'core:task_detail' task.pk %}"  class="btn btn-outline-info">Перегляд</a>
+                                <a href="{% url 'core:task_update' task.pk %}" class="btn btn-outline-primary">Редагувати</a>
+                                {% if not task.is_completed %}
+                                    <form method="post" action="{% url 'core:task_complete' task.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-success">Завершити</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <h3 class="text-muted">Завдань не знайдено</h3>
+            <p class="text-muted">Створіть перше завдання або змініть параметри пошуку</p>
+            <a href="{% url 'core:task_create' %}" class="btn btn-primary">Створити завдання</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .badge.bg-urgent { background-color: #dc3545; }
+    .badge.bg-high { background-color: #fd7e14; }
+    .badge.bg-medium { background-color: #ffc107; color: #000; }
+    .badge.bg-low { background-color: #28a745; }
+
+    .table-danger {
+        border-left: 4px solid #dc3545;
+        background-color: rgba(220, 53, 69, 0.05);
+    }
+
+    .table-success {
+        opacity: 0.8;
+        background-color: rgba(40, 167, 69, 0.05);
+    }
+</style>
+{% endblock %}

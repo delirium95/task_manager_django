@@ -1,0 +1,138 @@
+<!-- templates/projects/project_form.html -->
+{% extends "base.html" %}
+
+{% block title %}{% if form.instance.pk %}Редагувати проєкт{% else %}Створити проєкт{% endif %}{% endblock %}
+
+{% block page_title %}
+    {% if form.instance.pk %}
+        Редагувати проєкт: {{ form.instance.name }}
+    {% else %}
+        Створити новий проєкт
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Показуємо всі помилки -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Виправте помилки:</strong>
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Назва проєкту -->
+                    <div class="mb-3">
+                        <label for="id_name" class="form-label">Назва проєкту *</label>
+                        <input type="text" name="name" id="id_name"
+                               class="form-control"
+                               value="{{ form.name.value|default:'' }}"
+                               required>
+                    </div>
+
+                    <!-- Опис -->
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Опис *</label>
+                        <textarea name="description" id="id_description"
+                                  class="form-control" rows="4"
+                                  required>{{ form.description.value|default:'' }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <!-- Власник -->
+                        <div class="col-md-6 mb-3">
+                            <label for="id_owner" class="form-label">Власник</label>
+                            <select name="owner" id="id_owner" class="form-select">
+                                <option value="">---------</option>
+                                {% for worker in form.fields.owner.queryset %}
+                                    <option value="{{ worker.id }}"
+                                            {% if form.owner.value == worker.id %}selected{% endif %}>
+                                        {{ worker.get_full_name|default:worker.username }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Етап -->
+                        <div class="col-md-6 mb-3">
+                            <label for="id_stage" class="form-label">Етап</label>
+                            <select name="stage" id="id_stage" class="form-select">
+                                {% for value, label in form.fields.stage.choices %}
+                                    <option value="{{ value }}"
+                                            {% if form.stage.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Дата початку -->
+                        <div class="col-md-6 mb-3">
+                            <label for="id_start_date" class="form-label">Дата початку</label>
+                            <input type="date" name="start_date" id="id_start_date"
+                                   class="form-control"
+                                   value="{{ form.start_date.value|date:'Y-m-d' }}">
+                        </div>
+
+                        <!-- Дедлайн -->
+                        <div class="col-md-6 mb-3">
+                            <label for="id_deadline" class="form-label">Дедлайн (необов'язково)</label>
+                            <input type="date" name="deadline" id="id_deadline"
+                                   class="form-control"
+                                   value="{{ form.deadline.value|date:'Y-m-d'|default:'' }}">
+                        </div>
+                    </div>
+
+                    <!-- Команди -->
+                    <div class="mb-3">
+                        <label class="form-label">Команди</label>
+                        <div class="border rounded p-3">
+                            {% for team in form.teams.field.queryset %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="teams" value="{{ team.id }}"
+                                           id="team_{{ team.id }}"
+                                           {% if team.id in form.teams.value or team in form.instance.teams.all %}checked{% endif %}>
+                                    <label class="form-check-label" for="team_{{ team.id }}">
+                                        {{ team.name }}
+                                    </label>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted">Немає доступних команд</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Статус активності -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_active"
+                               id="id_is_active" class="form-check-input"
+                               {% if form.is_active.value %}checked{% endif %}>
+                        <label for="id_is_active" class="form-check-label">
+                            Активний проєкт
+                        </label>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'projects:list' %}" class="btn btn-secondary">
+                            Скасувати
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if form.instance.pk %}Зберегти зміни{% else %}Створити проєкт{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
